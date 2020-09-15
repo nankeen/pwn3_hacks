@@ -7,6 +7,8 @@ set(SOURCES
     ${PROJECT_SOURCE_DIR}/src/flying_cheat.cc
 )
 
+set(CMAKE_CXX_STANDARD 17)
+
 add_library(Cheats SHARED
     ${SOURCES}
 )
@@ -15,4 +17,10 @@ find_package(X11 REQUIRED)
 target_link_libraries(Cheats ${X11_LIBRARIES})
 target_include_directories(Cheats PRIVATE ${X11_INCLUDE_DIR})
 
+find_package(X11 REQUIRED)
+target_link_libraries(Cheats ${X11_LIBRARIES})
+target_include_directories(Cheats PRIVATE ${X11_INCLUDE_DIR})
+
 target_include_directories(Cheats PRIVATE "include")
+
+target_link_libraries(Cheats dl)
