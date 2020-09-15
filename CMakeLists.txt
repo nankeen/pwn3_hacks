@@ -5,6 +5,8 @@ project(Pwn3Hack)
 set(SOURCES 
     ${PROJECT_SOURCE_DIR}/src/cheat.cc
     ${PROJECT_SOURCE_DIR}/src/flying_cheat.cc
+    ${PROJECT_SOURCE_DIR}/src/speed_cheat.cc
+    ${PROJECT_SOURCE_DIR}/src/commands.cc
 )
 
 set(CMAKE_CXX_STANDARD 17)

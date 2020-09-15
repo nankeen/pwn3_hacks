@@ -5,9 +5,10 @@ The build target is Linux, which produces a shared object that can be loaded wit
 
 ## Features:
 
-- [ ] Fly hack
-- [ ] Speed hack
+- [x] Fly hack - TODO: In air movement
+- [x] Speed hack
 - [ ] Teleportation
+- [ ] Money hack
 - [ ] ESP
 
 ## Building

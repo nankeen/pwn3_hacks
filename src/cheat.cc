@@ -1,12 +1,15 @@
 #include <dlfcn.h>
 #include <iostream>
 #include <gameLogic.hh>
-#include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <memory>
 
 #include "cheat.hh"
 #include "flying_cheat.hh"
+#include "speed_cheat.hh"
+
+// Use for keyboard cool down
+static int kb_cooldown = 0;
 
 // Used for X Server functions
 static Display *display;
@@ -15,11 +18,8 @@ static Display *display;
 std::unique_ptr<std::map<std::string, std::unique_ptr<Cheat>>> cheats;
 
 // Check key events
-bool check_key(KeySym keysym)
+bool check_key(char *keys_return, KeySym keysym)
 {
-    char keys_return[32];
-
-    XQueryKeymap(display, keys_return);
     KeyCode kc = XKeysymToKeycode(display, keysym);
     return !!(keys_return[kc >> 3] & (1<<(kc&7)));
 }
@@ -29,9 +29,9 @@ bool check_key(KeySym keysym)
 void World::Tick(float f)
 {
     // Call the original world tick function first
-    void (*world_tick)(World*, float) = (void (*)(World*, float))dlsym(RTLD_NEXT, "_ZN6Player7CanJumpEv");
+    void (*world_tick)(World*, float) = (void (*)(World*, float))dlsym(RTLD_NEXT, "_ZN5World4TickEf");
     if (world_tick!= NULL) {
-        return world_tick(this, f);
+        world_tick(this, f);
     }
 
     // Get the game world object
@@ -43,6 +43,13 @@ void World::Tick(float f)
 
     // Run all on world tick callbacks
     for (auto &[name, cheat]: *cheats) {
+        if (kb_cooldown > 0) {
+            kb_cooldown--;
+        } else if (cheat->check_toggle(display)) {
+            kb_cooldown = 500;
+            cheat->toggle();
+            std::cout << "Toggling cheat: " << name << "..." << std::endl;
+        }
         cheat->on_world_tick(world);
     }
 }
@@ -66,6 +73,7 @@ __attribute__((constructor)) static void init_cheats()
 
     // Register cheats
     cheats->emplace("fly_hacks", std::make_unique<FlyingCheat>());
+    cheats->emplace("speed_hacks", std::make_unique<SpeedCheat>());
 }
 
 // Clean up the display structure
@@ -75,9 +83,8 @@ __attribute__((destructor)) static void cleanup_cheats()
     cheats->clear();
 }
 
-void Cheat::on_world_tick(ClientWorld *world)
-{
-}
+void Cheat::on_world_tick(ClientWorld *world) {}
+bool Cheat::check_toggle(Display *) { return false; }
 
 // Implement basic cheat controls
 void Cheat::enable()
@@ -92,5 +99,9 @@ void Cheat::disable()
 
 void Cheat::toggle()
 {
-    this->active = !this->active;
+    if (this->active) {
+        this->disable();
+    } else {
+        this->enable();
+    }
 }
