@@ -7,7 +7,7 @@ The build target is Linux, which produces a shared object that can be loaded wit
 
 - [x] Fly hack - TODO: In air movement
 - [x] Speed hack
-- [ ] Teleportation
+- [x] Teleportation
 - [ ] Money hack
 - [ ] ESP
 
